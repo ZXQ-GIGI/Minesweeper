@@ -1,0 +1,37 @@
+*{
+	padding: 0;
+	margin: 0;
+}
+
+body{
+	font-size: 12px;
+	font-family: "微软雅黑";
+	color: #666;
+	background: #eaeaea;
+}
+
+#tab{
+	border: 0;
+	margin: 10px 10px;
+	position: absolute;
+}
+#tab tr td{
+	border:1px;
+	width: 32px;
+	height: 32px;
+	padding: 1px;
+	background-color: #e4c0c0;
+}
+#tab tr .virtual{
+	background-color: #eaeaea;
+}
+
+#start{
+	width: 100px;
+	height:30px;
+	border-radius: 5px;
+	border: 1px solid;
+	float: right;
+	margin-top: 10px;
+	margin-right: 180px;
+}
