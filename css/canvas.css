@@ -12,15 +12,15 @@ body{
 
 #tab{
 	border: 0;
-	margin: 10px 10px;
+	/*margin: 10px 10px;*/
 	position: absolute;
 }
 #tab tr td{
 	border:1px;
-	width: 32px;
-	height: 32px;
+	width: 30px;
+	height: 30px;
 	padding: 1px;
-	background-color: #e4c0c0;
+	background-color: #fff;
 }
 #tab tr .virtual{
 	background-color: #eaeaea;
