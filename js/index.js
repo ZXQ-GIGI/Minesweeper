@@ -5,7 +5,8 @@ const mineNum = 99;
 const rows = 18;
 const cols = 27;
 var mines = new Array();
-var bricks = new Array(); //
+var bricks = new Array(); 
+var playerBricks = new Array();
 
 function Brick(){
 
@@ -17,8 +18,10 @@ function Brick(){
 
 function PlayerBrick(){
 	this.isMine = false;
+	this.totalNum = 0; 	
 	this.leftNum = 0;
 	this.isClicked = false;
+	this.isTempMine = false;
 }
 function SetButtons(){
 
@@ -41,9 +44,11 @@ function SetButtons(){
 	}
 	//initialise bricks
 	for(var i = 0; i < rows; i++){
-		bricks[i] = new Array(); 
+		bricks[i] = new Array();
+		playerBricks[i] = new Array(); 
 		for(var j = 0; j < cols; j++){
-			bricks[i][j] = new Brick();			
+			bricks[i][j] = new Brick();	
+			playerBricks[i][j] = new PlayerBrick();
 		}
 	}
 }
@@ -53,12 +58,16 @@ function ClickAction(obj){
 	var id = obj.id;
 	if(startMark){
 		ClickFirst(id);
-		DisplayNumber(Math.floor(id/cols), id%cols);		
+		DisplayNumber(Math.floor(id/cols), id%cols);
+		PlayerSync();
+		AutomaticSearching();		
 		startMark = false;
 	}
 	else{
 		if(!GameOver(Math.floor(id/cols), id%cols)){
 			DisplayNumber(Math.floor(id/cols), id%cols);
+			PlayerSync();
+			AutomaticSearching()
 		}
 	}	
 }
@@ -121,7 +130,7 @@ function DisplayNumber(i,j){
 			document.getElementById(i*cols+j).innerHTML = bricks[i][j].totalNum;
 		}
 		else{
-			for(var m = 0; m<9; m++){
+			for(var m = 0; m < 9; m++){
 				var x = NineBricks(i,j)[m][0];
 				var y = NineBricks(i,j)[m][1]; 	
 				DisplayNumber(x,y);			
@@ -133,13 +142,93 @@ function DisplayNumber(i,j){
 function GameOver(i,j){
 	if(bricks[i][j].isMine){
 		for(var m=0;m<mines.length;m++){
-			//document.writeln(mines[m]);
 			document.getElementById(mines[m]).style.backgroundColor = "#f00";
 		}
 		return true;
 	}
 	return false;
 }
+
+//get all clicked information after each click 
+function PlayerSync(){
+	for(var i = 0; i < rows; i++){
+		for(var j = 0; j < cols; j++){
+			if(bricks[i][j].isClicked){
+				playerBricks[i][j].isClicked = true;
+				playerBricks[i][j].totalNum = bricks[i][j].totalNum;			
+			}
+		}
+	}
+}
+
+function AutomaticSearching(){
+	//Mine searching
+	for(var i = 0; i < playerBricks.length; i++){
+		for(var j = 0; j < playerBricks[i].length; j++){
+			if(playerBricks[i][j].isClicked){
+				var leftArray = UnclickedNumberOfBrick(i,j);
+				if(leftArray.length == LeftNumberOfMines(i,j)){
+					for(var m = 0; m < leftArray.length; m++){
+						playerBricks[leftArray[m][0]][leftArray[m][1]].isMine = true;
+						playerBricks[i][j].leftNum--;
+					}
+				}
+			}
+		}
+	}
+	//number searching
+	for(var i = 0; i < playerBricks.length; i++){
+		for(var j = 0; j < playerBricks[i].length; j++){
+			if(playerBricks[i][j].isClicked){
+				if(playerBricks[i][j].leftNum == 0){
+					var leftArray = UnclickedNumberOfBrick(i,j);
+					for(var m = 0; m < leftArray.length; m++){
+						var x = leftArray[m][0];
+						var y = leftArray[m][1];
+						document.getElementById(x+cols+y).style.backgroundColor = "#f0f";
+					}
+				}
+			}
+		}
+	}
+}
+//the number of mines that have been found
+function MineNumberOfBrick(i,j){
+	var num = 0;
+	for(var m = 0; m < 9; m++){
+		if(m != 4){
+			var x = NineBricks(i,j)[m][0];
+			var y = NineBricks(i,j)[m][1]; 
+			if(playerBricks[x][y].isMine){
+				num++;
+			}
+		}	
+	}
+	return num;
+}
+
+//the left number of mines that haven't been found
+function LeftNumberOfMines(i,j){
+	return playerBricks[i][j].totalNum - MineNumberOfBrick(i,j);
+}
+
+//the number of bricks that haven't been clicked
+function UnclickedNumberOfBrick(i,j){
+	//var num = 0;
+	var array = new Array
+	for(var m = 0; m < 9; m++){
+		if(m != 4){
+			var x = NineBricks(i,j)[m][0];
+			var y = NineBricks(i,j)[m][1]; 
+			if(playerBricks[x][y].isClicked == false && playerBricks[i][j].isMine == false){
+				array.push([x,y]);
+				//num++;
+			}
+		}	
+	}
+	return array;
+}
+
 
 function NineId(id){
 	return [
