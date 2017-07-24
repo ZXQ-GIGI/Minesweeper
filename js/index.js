@@ -7,6 +7,7 @@ const cols = 27;
 var mines = new Array();
 var bricks = new Array(); 
 var playerBricks = new Array();
+var clickmark = 0;
 
 function Brick(){
 
@@ -69,7 +70,8 @@ function ClickAction(obj){
 			PlayerSync();
 			AutomaticSearching();
 		}
-	}	
+	}
+	clickmark++;	
 }
 
 //first time to click and set all mines
@@ -93,7 +95,7 @@ function ClickFirst(id){
 	// mark mines
 	for(var i = 0; i < bricks.length; i++){
 		for(var j = 0; j < bricks[i].length; j++){
-			if(mines.indexOf(i*cols+j)>=0){
+			if(mines.indexOf(i*cols+j) >= 0){
 				bricks[i][j].isMine = true;
 			}			
 		}
@@ -105,7 +107,7 @@ function ClickFirst(id){
 				for(var m = 0; m < 9; m++){
 					var x = NineBricks(i,j)[m][0];
 					var y = NineBricks(i,j)[m][1];
-					if(m != 4 && bricks[x][y].isMine == true){
+					if(m != 4 && bricks[x][y].isMine){
 						bricks[i][j].totalNum += 1;
 						bricks[i][j].leftNum += 1;
 					}
@@ -118,7 +120,7 @@ function ClickFirst(id){
 
 function DisplayNumber(i,j){
 
-	if(i>0 && i<rows-1 && j>0 && j<cols-1 && bricks[i][j].isClicked==false){
+	if(i>0 && i<rows-1 && j>0 && j<cols-1 && !bricks[i][j].isClicked){
 
 		document.getElementById(i*cols+j).style.backgroundColor = "#eee";
 		document.getElementById(i*cols+j).disabled = true;
@@ -155,7 +157,6 @@ function PlayerSync(){
 			if(bricks[i][j].isClicked){
 				playerBricks[i][j].isClicked = true;			
 			}
-			//console.log(playerBricks[i][j].totalNum);
 		}
 	}
 }
@@ -165,16 +166,18 @@ function AutomaticSearching(){
 	for(var i = 1; i < playerBricks.length - 1; i++){
 		for(var j = 1; j < playerBricks[i].length - 1; j++){
 			if(bricks[i][j].isClicked && bricks[i][j].totalNum > 0){
+
 				var leftArray = UnclickedNumberOfBrick(i,j);
-				//console.log(leftArray);
-				//console.log(LeftNumberOfMines(i,j));
-				if(leftArray.length == LeftNumberOfMines(i,j)){
+				var leftNumber = LeftNumberOfMines(i,j);
+
+				if(leftArray.length == leftNumber){
 					for(var m = 0; m < leftArray.length; m++){
-						playerBricks[leftArray[m][0]][leftArray[m][1]].isMine = true;
-						bricks[i][j].leftNum--;
-						document.getElementById(leftArray[m][0]*cols+leftArray[m][1]).style.backgroundColor = "#0de";
+						var x = leftArray[m][0];
+						var y = leftArray[m][1];
+						playerBricks[x][y].isMine = true;
+						bricks[i][j].leftNum--;	
+						document.getElementById(x*cols+y).style.backgroundColor = "#0de";
 					}
-					//console.log(i+","+j+":"+bricks[i][j].leftNum);
 				}
 			}
 		}
@@ -183,15 +186,13 @@ function AutomaticSearching(){
 	for(var i = 1; i < playerBricks.length - 1; i++){
 		for(var j = 1; j < playerBricks[i].length - 1; j++){
 			if(bricks[i][j].isClicked && bricks[i][j].totalNum > 0){
+				console.log(bricks[i][j].totalNum + ":");
 				if(LeftNumberOfMines(i,j) == 0){
-					var left = UnclickedNumberOfBrick(i,j);
-					//console.log(left);
-					for(var m = 0; m < left.length; m++){
-						var x = left[m][0];
-						var y = left[m][1];
-						
-						if(x>0&&x<26&&y>0&&y<17&&playerBricks[x][y].isMine == false){
-							console.log(x+"'"+y);
+					var leftArray = UnclickedNumberOfBrick(i,j);
+					for(var m = 0; m < leftArray.length; m++){
+						var x = leftArray[m][0];
+						var y = leftArray[m][1];		
+						if(x>0 && x<17 && y>0 && y<26 && !playerBricks[x][y].isMine){
 							document.getElementById(x*cols+y).style.backgroundColor = "#f0f";
 						}
 						
@@ -223,15 +224,13 @@ function LeftNumberOfMines(i,j){
 
 //the number of bricks that haven't been clicked
 function UnclickedNumberOfBrick(i,j){
-	//var num = 0;
 	var array = new Array();
 	for(var m = 0; m < 9; m++){
 		if(m != 4){
 			var x = NineBricks(i,j)[m][0];
 			var y = NineBricks(i,j)[m][1]; 
-			if(bricks[x][y].isClicked == false && playerBricks[i][j].isMine == false){
+			if(!bricks[x][y].isClicked && !playerBricks[x][y].isMine){
 				array.push([x,y]);
-				//num++;
 			}
 		}	
 	}
