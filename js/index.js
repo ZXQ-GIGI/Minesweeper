@@ -9,13 +9,7 @@ var bricks = new Array();
 var playerBricks = new Array();
 var clickmark = 0;
 
-const RIGHT = 0;
-const DOWN = 1;
-const LEFT = 2;
-const UP = 3;
-
 function Brick(){
-
 	this.isMine = false; 		//bool
 	this.totalNum = 0; 			//total number of mines
 	this.leftNum = 0; 			//the number of unknown mines
@@ -25,17 +19,15 @@ function Brick(){
 function PlayerBrick(){
 	this.isMine = false;
 	this.isTempMine = false;
+	this.isEdge = false;
 	this.isScan = false;
 	//this.direction = -1;
 }
 function SetButtons(){
-
 	startMark = true;
 	var myTable = document.getElementById("tab");
-	
 	for(var i = 0; i < rows; i++){
 		for(var j = 0; j < cols; j++){
-
 			var id = i*cols + j;
 			var str = "<button id=" + id + " onclick = 'ClickAction(this)'></button>";
 			
@@ -43,6 +35,7 @@ function SetButtons(){
 				myTable.rows[i].cells[j].innerHTML = str;
 				document.getElementById(id).style.width = "30px";
 				document.getElementById(id).style.height = "30px";
+				document.getElementById(id).style.borderColor = "#fff";
 				document.getElementById(id).style.backgroundColor = "#999";
 			}
 		}
@@ -66,7 +59,7 @@ function ClickAction(obj){
 		DisplayNumber(Math.floor(id/cols), id%cols);
 		PlayerSync();
 		AutomaticSearching();	
-		GetBoundary();	
+		//GetBoundary();	
 		startMark = false;
 	}
 	else{
@@ -74,7 +67,7 @@ function ClickAction(obj){
 			DisplayNumber(Math.floor(id/cols), id%cols);
 			PlayerSync();
 			AutomaticSearching();
-			GetBoundary();
+			//GetBoundary();
 		}
 	}
 	clickmark++;	
@@ -172,10 +165,8 @@ function AutomaticSearching(){
 	for(var i = 1; i < playerBricks.length - 1; i++){
 		for(var j = 1; j < playerBricks[i].length - 1; j++){
 			if(bricks[i][j].isClicked && bricks[i][j].totalNum > 0){
-
 				var leftArray = UnclickedNumberOfBrick(i,j);
 				var leftNumber = LeftNumberOfMines(i,j);
-
 				if(leftArray.length == leftNumber){
 					for(var m = 0; m < leftArray.length; m++){
 						var x = leftArray[m][0];
@@ -197,7 +188,7 @@ function AutomaticSearching(){
 					for(var m = 0; m < leftArray.length; m++){
 						var x = leftArray[m][0];
 						var y = leftArray[m][1];		
-						if(x>0 && x<17 && y>0 && y<26 && !playerBricks[x][y].isMine){
+						if(!playerBricks[x][y].isMine){
 							document.getElementById(x*cols+y).style.backgroundColor = "#f0f";
 						}
 						
@@ -206,40 +197,82 @@ function AutomaticSearching(){
 			}
 		}
 	}
+	//assumption searching
+	if(isTimeToAssumption()){
+		GetBoundary();
+	}
 }
 
 function GetBoundary(){
-	var scanPonit = new Array();
-	var nextPoint = new Array();
+	var bounaries = new Array();
+	for(var i = 1; i < playerBricks.length - 1; i++){
+		for(var j = 1; j < playerBricks[i].length - 1; j++){
+			playerBricks[i][j].isScan =  false;
+			if(!isBoundary(i,j)){
+				playerBricks[i][j].isScan = true;
+			}
+			document.getElementById(i*cols+j).style.borderColor = "#fff";
+		}
+	}	
+	//find edge
 	for(var i = 1; i < playerBricks.length - 1; i++){
 		for(var j = 1; j < playerBricks[i].length - 1; j++){
 			if(playerBricks[i][j].isClicked || playerBricks[i][j].isMine){
-				scanPonit.push([i,j,RIGHT]);
-				nextPoint = DirectionSearching(i,j,RIGHT);
-				document.getElementById(i*cols+j).style.backgroundColor =  "#0f0";
-				break;
+				var scanPonit = new Array();
+				var nextPoint = new Array();
+				if(isBoundary(i,j) && !playerBricks[i][j].isScan){
+					scanPonit.push([i,j,0]);
+					playerBricks[i][j].isScan = true;
+					nextPoint = DirectionSearching(i,j,0);
+					document.getElementById(i*cols+j).style.borderColor =  "#234";
+					while(nextPoint[0]!=scanPonit[0][0] || nextPoint[1]!=scanPonit[0][1]){
+						scanPonit.push(nextPoint);
+						var x = nextPoint[0];
+						var y = nextPoint[1];
+						var dir = nextPoint[2];
+						playerBricks[x][y].isScan = true;
+						nextPoint = DirectionSearching(x,y,dir);
+						document.getElementById(x*cols+y).style.borderColor =  "#234";
+					}
+					bounaries.push(scanPonit);		
+				}			
 			}
 		}
-		if(scanPonit.length == 1){
-			break;
+	}
+	console.log(bounaries.length);
+	console.log(bounaries);
+}
+
+function isTimeToAssumption(){
+	for(var i = 1; i < playerBricks.length - 1; i++){
+		for(var j = 1; j < playerBricks[i].length - 1; j++){
+			//console.log(document.getElementById(i*cols+j).style.backgroundColor);
+			if(document.getElementById(i*cols+j).style.backgroundColor == "rgb(255, 0, 255)"){
+				return false;
+			}
 		}
 	}
+	return true;
+}
 
-	while(nextPoint[0]!=scanPonit[0][0] || nextPoint[1]!=scanPonit[0][1]){
-		scanPonit.push(nextPoint);
-		var x = nextPoint[0];
-		var y = nextPoint[1];
-		var dir = nextPoint[2];
-		nextPoint = DirectionSearching(x,y,dir);
-		document.getElementById(x*cols+y).style.backgroundColor =  "#0f0";
+function isBoundary(i,j){
+	for(var m = 0; m < 9; m++){
+		if(m != 4){
+			var x = NineBricks(i,j)[m][0];
+			var y = NineBricks(i,j)[m][1]; 
+			if(!playerBricks[x][y].isClicked && !playerBricks[x][y].isMine){
+				return true;
+			}
+		}
 	}
+	return false;
 }
 
 function DirectionSearching(i,j,pre_direction){
 	var startDirection = (pre_direction + 3) % 4;
-	var brick = new Array();	
+	var brick = [i,j,pre_direction];	
 	for(var s = startDirection; s < startDirection + 4; s++){
-		var next_direction = NextDirection(i,j,s%4);
+		var next_direction = NextDirection(i,j,s % 4);
 		var x = next_direction[0];
 		var y = next_direction[1];
 		if(playerBricks[x][y].isClicked || playerBricks[x][y].isMine){
@@ -253,10 +286,10 @@ function DirectionSearching(i,j,pre_direction){
 function NextDirection(i,j,direction){
 	var nextDirection = [i,j,direction];
 	switch(direction){
-		case 0: nextDirection = [i,j+1,0]; break;
-		case 1: nextDirection = [i+1,j,1]; break;
-		case 2: nextDirection = [i,j-1,2]; break;
-		case 3: nextDirection = [i-1,j,3]; break;
+		case 0: nextDirection = [i,j+1,0]; break;//right
+		case 1: nextDirection = [i+1,j,1]; break;//down
+		case 2: nextDirection = [i,j-1,2]; break;//left
+		case 3: nextDirection = [i-1,j,3]; break;//up
 	}
 	return nextDirection;
 }
@@ -329,14 +362,14 @@ function NineBricks(i,j){
 function NumberColor(num){
 	var cr = "#000";
 	switch(num){
-		case 1:cr = "#235";break;
-		case 2:cr = "#413";break;
-		case 3:cr = "#630";break;
-		case 4:cr = "#274";break;
-		case 5:cr = "#234";break;
-		case 6:cr = "#494";break;
-		case 7:cr = "#77e";break;
-		case 8:cr = "#115";break;
+		case 1:cr = "#100";break;
+		case 2:cr = "#200";break;
+		case 3:cr = "#300";break;
+		case 4:cr = "#400";break;
+		case 5:cr = "#500";break;
+		case 6:cr = "#600";break;
+		case 7:cr = "#700";break;
+		case 8:cr = "#800";break;
 	}
 	return cr;
 }
