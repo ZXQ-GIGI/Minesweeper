@@ -7,7 +7,6 @@ const cols = 27;
 var mines = new Array();
 var bricks = new Array(); 
 var playerBricks = new Array();
-var clickmark = 0;
 
 function Brick(){
 	this.isMine = false; 		//bool
@@ -70,7 +69,6 @@ function ClickAction(obj){
 			//GetBoundary();
 		}
 	}
-	clickmark++;	
 }
 
 //first time to click and set all mines
@@ -208,8 +206,9 @@ function GetBoundary(){
 	for(var i = 1; i < playerBricks.length - 1; i++){
 		for(var j = 1; j < playerBricks[i].length - 1; j++){
 			playerBricks[i][j].isScan =  false;
-			if(!isBoundary(i,j)){
-				playerBricks[i][j].isScan = true;
+			playerBricks[i][j].isEdge = false;
+			if(isBoundary(i,j)){
+				playerBricks[i][j].isEdge = true; //find all edges
 			}
 			document.getElementById(i*cols+j).style.borderColor = "#fff";
 		}
@@ -220,16 +219,16 @@ function GetBoundary(){
 			if(playerBricks[i][j].isClicked || playerBricks[i][j].isMine){
 				var scanPonit = new Array();
 				var nextPoint = new Array();
-				if(isBoundary(i,j) && !playerBricks[i][j].isScan){
+				if(playerBricks[i][j].isEdge && !playerBricks[i][j].isScan){
 					scanPonit.push([i,j,0]);
 					playerBricks[i][j].isScan = true;
 					nextPoint = DirectionSearching(i,j,0);
 					document.getElementById(i*cols+j).style.borderColor =  "#234";
 					while(nextPoint[0]!=scanPonit[0][0] || nextPoint[1]!=scanPonit[0][1]){
-						scanPonit.push(nextPoint);
 						var x = nextPoint[0];
 						var y = nextPoint[1];
 						var dir = nextPoint[2];
+						scanPonit.push(nextPoint);
 						playerBricks[x][y].isScan = true;
 						nextPoint = DirectionSearching(x,y,dir);
 						document.getElementById(x*cols+y).style.borderColor =  "#234";
@@ -241,12 +240,12 @@ function GetBoundary(){
 	}
 	console.log(bounaries.length);
 	console.log(bounaries);
+	return bounaries;
 }
 
 function isTimeToAssumption(){
 	for(var i = 1; i < playerBricks.length - 1; i++){
 		for(var j = 1; j < playerBricks[i].length - 1; j++){
-			//console.log(document.getElementById(i*cols+j).style.backgroundColor);
 			if(document.getElementById(i*cols+j).style.backgroundColor == "rgb(255, 0, 255)"){
 				return false;
 			}
@@ -276,8 +275,10 @@ function DirectionSearching(i,j,pre_direction){
 		var x = next_direction[0];
 		var y = next_direction[1];
 		if(playerBricks[x][y].isClicked || playerBricks[x][y].isMine){
-			brick = next_direction;
-			break;
+			if(playerBricks[x][y].isEdge){
+				brick = next_direction;
+				break;
+			}	
 		}
 	}
 	return brick;
