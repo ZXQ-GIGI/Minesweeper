@@ -195,9 +195,37 @@ function AutomaticSearching(){
 			}
 		}
 	}
-	//assumption searching
+	//boundary searching
 	if(isTimeToAssumption()){
-		GetBoundary();
+		BoundarySearching();
+		//GetBoundary();
+	}
+}
+
+function BoundarySearching(){
+	var bounaries = GetBoundary();
+	for(var b = 0; b < bounaries.length; b++){
+		for(var line = 0; line < bounaries[b].length; line++){
+
+		}
+	}
+}
+//all possibilities of putting mines left
+function MinePossibility(i,j){
+	var possibility = new Array();
+	var leftNumber = LeftNumberOfMines(i,j);
+	var markNum = new Array();
+	if(leftNumber > 0){
+		var array = UnclickedNumberOfBrick(i,j);
+		while(markNum.length == )
+		var total = 0;
+		for(var a = 0; a < array.length; a++){
+			markNum[a].push(Math.floor(Math.random() * 2));
+			total += markNum;
+		}
+		if(totalNum == leftNumber){
+
+		}
 	}
 }
 
@@ -323,7 +351,7 @@ function UnclickedNumberOfBrick(i,j){
 			var x = NineBricks(i,j)[m][0];
 			var y = NineBricks(i,j)[m][1]; 
 			if(!bricks[x][y].isClicked && !playerBricks[x][y].isMine){
-				if(x>0&&x<17&&y>0&&y<26){
+				if(x>0 && x<17 && y>0 && y<26){
 					array.push([x,y]);
 				}		
 			}
@@ -374,8 +402,3 @@ function NumberColor(num){
 	}
 	return cr;
 }
-
-
-
-
-
