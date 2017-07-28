@@ -58,7 +58,7 @@ function ClickAction(obj){
 		DisplayNumber(Math.floor(id/cols), id%cols);
 		PlayerSync();
 		AutomaticSearching();
-		//console.log(groupSplit([[1,2],[2,3],[3,4],[4,4]],3));
+		console.log(groupSplit([],1));
 		//console.log(MinePossibility(10,10));
 		//console.log(C(3,3));	
 
@@ -203,14 +203,14 @@ function AutomaticSearching(){
 	//boundary searching
 	if(isTimeToAssumption()){
 		var possibility = GetPossibility();
-		/*if(possibility.length == 1){
+		if(possibility.length == 1){
 			for(var p = 0; p < possibility[0].length; p++){
 				var x = possibility[p][0];
 				var y = possibility[p][1];
-				document.getElementById(x+cols+y).style.backgroundColor = "#0de";
+				document.getElementById(x*cols+y).style.backgroundColor = "#0de";
 			}
-		}*/
-		/*if(possibility.length > 1){
+		}
+		if(possibility.length > 1){
 			for(var i = 0; i < possibility[0].length; i++){
 				var x = possibility[i][0];
 				var y = possibility[i][1];
@@ -221,57 +221,75 @@ function AutomaticSearching(){
 					}
 				}
 				if(j == possibility.length){
-					document.getElementById(x+cols+y).style.backgroundColor = "#0de";
+					document.getElementById(x*cols+y).style.backgroundColor = "#0de";
 				}
 			}
-		}*/
+		}
 		//GetBoundary();
 	}
 }
 
 function GetPossibility(){
 	var bounaries = GetBoundary();
-	var results = [[]];
 	for(var b = 0; b < bounaries.length; b++){
 		var boundary = bounaries[b];
+		var results = [[]];
 		for(var l = 0; l < boundary.length; l++){
 			var x = boundary[l][0];
 			var y = boundary[l][1];
+			console.log("num : "+ bricks[x][y].totalNum);
 			if(!playerBricks[x][y].isMine){
 				var possibility = MinePossibility(x,y);
-				var pLen = possibility.length;	
-				var rLen = results.length;
-				//console.log("bbbb"+possibility[0]);
-				for(var r = 0; r < rLen; r++){
-					var tempArr = results[r];
-					for(var point = 0; point < possibility[0].length; point++){
-						results[r].push(possibility[0][point]);
-					}
-					var mark = 1;
-					while(mark < pLen){					
-						results.push(tempArr);			
-						for(var point = 0; point < possibility[mark].length; point++){
-							results[results.length - 1].push(possibility[mark][point]);
+				var pLen = possibility.length;
+				if(pLen > 0){		
+					var rLen = results.length;
+					console.log("posi : "+possibility);
+					for(var r = 0; r < rLen; r++){
+						var tempArr = results[r].slice(0);
+						console.log("temp1:"+tempArr);
+						for(var point = 0; point < possibility[0].length; point++){
+							console.log("ccc"+possibility[0][point]);
+							results[r].push(possibility[0][point]);
 						}
-						mark++;
-					}		
-				}
-				console.log(results);
-				for(var r = 0; r < results.length; r++){
-					for(var p = 0; p < results[r].length; p++){
-						var _x = results[r][p][0];
-						var _y = results[r][p][1];
-						playerBricks[_x][_y].isTempMine = true;
+						for(var m = 0; m<results.length; m++){
+						console.log(m+"]:"+results[m]);
 					}
-					if(!Rationality(x,y)){
-						results.splice(r,1);
+
+						var mark = 1;
+						while(mark < pLen){		
+							console.log("temp2:"+tempArr);			
+							results.push(tempArr);	
+							console.log(results.length);		
+							for(var point = 0; point < possibility[mark].length; point++){
+								console.log("ccc"+possibility[mark][point]);
+								results[results.length - 1].push(possibility[mark][point]);
+							}
+							mark++;
+						}	
+							
 					}
-					for(var p = 0; p < results[r].length; p++){
-						var _x = results[r][p][0];
-						var _y = results[r][p][1];
-						playerBricks[_x][_y].isTempMine = false;
+					for(var m = 0; m<results.length; m++){
+						console.log(m+"]:"+results[m]);
+					}	
+					for(var r = 0; r < results.length; r++){
+						for(var p = 0; p < results[r].length; p++){
+							var _x = results[r][p][0];
+							var _y = results[r][p][1];
+							playerBricks[_x][_y].isTempMine = true;
+						}
+						if(!Rationality(x,y)){
+							results.splice(r,1);
+						}
+						else{
+							for(var p = 0; p < results[r].length; p++){
+								var _x = results[r][p][0];
+								var _y = results[r][p][1];
+								playerBricks[_x][_y].isTempMine = false;
+							}
+						}			
 					}
-				}
+				}	
+				//console.log(results);		
 			}
 		}
 	}
@@ -286,8 +304,9 @@ function Rationality(i,j){
 			if(bricks[x1][y1].isClicked){
 				for(var n = 0; n < 9; n++){
 					if(n != 4){
-						var x2 = NineBricks(x1,y1)[m][0];
-						var y2 = NineBricks(x1,y1)[m][1];
+						var x2 = NineBricks(x1,y1)[n][0];
+						var y2 = NineBricks(x1,y1)[n][1];
+						console.log("xxxx" + x2+","+y2);
 						if((LeftNumberOfMines(x2,y2) - TempmineNumberOfBrick(x2,y2)) < 0){
 							return false;
 						}
@@ -385,8 +404,8 @@ function GetBoundary(){
 			}
 		}
 	}
-	console.log(bounaries.length);
-	console.log(bounaries);
+	//console.log(bounaries.length);
+	//console.log(bounaries);
 	return bounaries;
 }
 
