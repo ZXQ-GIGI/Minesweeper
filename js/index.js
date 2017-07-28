@@ -57,7 +57,11 @@ function ClickAction(obj){
 		ClickFirst(id);
 		DisplayNumber(Math.floor(id/cols), id%cols);
 		PlayerSync();
-		AutomaticSearching();	
+		AutomaticSearching();
+		//console.log(groupSplit([[1,2],[2,3],[3,4],[4,4]],3));
+		//console.log(MinePossibility(10,10));
+		//console.log(C(3,3));	
+
 		//GetBoundary();	
 		startMark = false;
 	}
@@ -66,6 +70,7 @@ function ClickAction(obj){
 			DisplayNumber(Math.floor(id/cols), id%cols);
 			PlayerSync();
 			AutomaticSearching();
+			//console.log(MinePossibility(10,10));
 			//GetBoundary();
 		}
 	}
@@ -197,36 +202,150 @@ function AutomaticSearching(){
 	}
 	//boundary searching
 	if(isTimeToAssumption()){
-		BoundarySearching();
+		var possibility = GetPossibility();
+		/*if(possibility.length == 1){
+			for(var p = 0; p < possibility[0].length; p++){
+				var x = possibility[p][0];
+				var y = possibility[p][1];
+				document.getElementById(x+cols+y).style.backgroundColor = "#0de";
+			}
+		}*/
+		/*if(possibility.length > 1){
+			for(var i = 0; i < possibility[0].length; i++){
+				var x = possibility[i][0];
+				var y = possibility[i][1];
+				var point = [x,y];
+				for(var j = 0; j < possibility.length; j++){
+					if(!possibility[j].indexOf(point)){
+						break;
+					}
+				}
+				if(j == possibility.length){
+					document.getElementById(x+cols+y).style.backgroundColor = "#0de";
+				}
+			}
+		}*/
 		//GetBoundary();
 	}
 }
 
-function BoundarySearching(){
+function GetPossibility(){
 	var bounaries = GetBoundary();
+	var results = [[]];
 	for(var b = 0; b < bounaries.length; b++){
-		for(var line = 0; line < bounaries[b].length; line++){
-
+		var boundary = bounaries[b];
+		for(var l = 0; l < boundary.length; l++){
+			var x = boundary[l][0];
+			var y = boundary[l][1];
+			if(!playerBricks[x][y].isMine){
+				var possibility = MinePossibility(x,y);
+				var pLen = possibility.length;	
+				var rLen = results.length;
+				//console.log("bbbb"+possibility[0]);
+				for(var r = 0; r < rLen; r++){
+					var tempArr = results[r];
+					for(var point = 0; point < possibility[0].length; point++){
+						results[r].push(possibility[0][point]);
+					}
+					var mark = 1;
+					while(mark < pLen){					
+						results.push(tempArr);			
+						for(var point = 0; point < possibility[mark].length; point++){
+							results[results.length - 1].push(possibility[mark][point]);
+						}
+						mark++;
+					}		
+				}
+				console.log(results);
+				for(var r = 0; r < results.length; r++){
+					for(var p = 0; p < results[r].length; p++){
+						var _x = results[r][p][0];
+						var _y = results[r][p][1];
+						playerBricks[_x][_y].isTempMine = true;
+					}
+					if(!Rationality(x,y)){
+						results.splice(r,1);
+					}
+					for(var p = 0; p < results[r].length; p++){
+						var _x = results[r][p][0];
+						var _y = results[r][p][1];
+						playerBricks[_x][_y].isTempMine = false;
+					}
+				}
+			}
 		}
 	}
+	return results;
 }
+
+function Rationality(i,j){
+	for(var m = 0; m < 9; m++){
+		if(m!=4){
+			var x1 = NineBricks(i,j)[m][0];
+			var y1 = NineBricks(i,j)[m][1]; 
+			if(bricks[x1][y1].isClicked){
+				for(var n = 0; n < 9; n++){
+					if(n != 4){
+						var x2 = NineBricks(x1,y1)[m][0];
+						var y2 = NineBricks(x1,y1)[m][1];
+						if((LeftNumberOfMines(x2,y2) - TempmineNumberOfBrick(x2,y2)) < 0){
+							return false;
+						}
+					}
+				}
+			}
+		}
+	}
+	return true;
+}
+
+
 //all possibilities of putting mines left
 function MinePossibility(i,j){
 	var possibility = new Array();
-	var leftNumber = LeftNumberOfMines(i,j);
-	var markNum = new Array();
-	if(leftNumber > 0){
-		var array = UnclickedNumberOfBrick(i,j);
-		while(markNum.length == )
-		var total = 0;
-		for(var a = 0; a < array.length; a++){
-			markNum[a].push(Math.floor(Math.random() * 2));
-			total += markNum;
-		}
-		if(totalNum == leftNumber){
-
-		}
+	var leftMine = LeftNumberOfMines(i,j);
+	//console.log("leftmine:" + leftMine);
+	if(leftMine > 0){
+		var unclickdArray = UnclickedNumberOfBrick(i,j);
+		possibility = groupSplit(unclickdArray,leftMine);	
 	}
+	return possibility;
+}
+
+function groupSplit (arr, size) {
+  var r = []; //result
+  function _(t, a, n) { //tempArr, arr, num
+    if (n === 0) {
+      r[r.length] = t;
+      return;
+    }
+    for (var i = 0, l = a.length - n; i <= l; i++) {
+      var b = t.slice();
+      b.push(a[i]);
+      _(b, a.slice(i + 1), n - 1);
+    }
+  }
+  _([], arr, size);
+  return r;
+}
+//Cmn = m!/(n!*(m-n)!)
+function C(m,n){
+	if(m < n || m < 0 || n < 0){
+		return;
+	}
+	return Factorial(m)/(Factorial(n)*Factorial(m-n));
+}
+// = num!
+function Factorial(num){
+	var product = 1;
+	if(num < 0){
+		return;
+	}
+	while(num > 0){
+		product *= num;
+		num--;
+	}
+	return product;
 }
 
 function GetBoundary(){
@@ -331,6 +450,19 @@ function MineNumberOfBrick(i,j){
 			var x = NineBricks(i,j)[m][0];
 			var y = NineBricks(i,j)[m][1]; 
 			if(playerBricks[x][y].isMine){
+				num++;
+			}
+		}	
+	}
+	return num;
+}
+function TempmineNumberOfBrick(i,j){
+	var num = 0;
+	for(var m = 0; m < 9; m++){
+		if(m != 4){
+			var x = NineBricks(i,j)[m][0];
+			var y = NineBricks(i,j)[m][1]; 
+			if(playerBricks[x][y].isTempMine){
 				num++;
 			}
 		}	
