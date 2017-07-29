@@ -1,9 +1,9 @@
 'use strict'
 
 var startMark = false;
-const mineNum = 99;
-const rows = 18;
-const cols = 27;
+const MINE_NUM = 99;
+const ROWS = 18;
+const COLS = 27;
 var mines = new Array();
 var bricks = new Array(); 
 var playerBricks = new Array();
@@ -20,18 +20,21 @@ function PlayerBrick(){
 	this.isTempMine = false;
 	this.isEdge = false;
 	this.isScan = false;
-	//this.direction = -1;
+}
+
+function Point(x,y){
+	this.x = x;
+	this.y = y;
 }
 function SetButtons(){
 	startMark = true;
 	var myTable = document.getElementById("tab");
-	for(var i = 0; i < rows; i++){
-		for(var j = 0; j < cols; j++){
-			var id = i*cols + j;
+	for(var i = 0; i < ROWS; i++){
+		for(var j = 0; j < COLS; j++){
+			var id = i*COLS + j;
 			var str = "<button id=" + id + " onclick = 'ClickAction(this)'></button>";
-			
-			if(myTable.rows[i].cells[j].className != "brick virtual"){
-				myTable.rows[i].cells[j].innerHTML = str;
+			if(myTable.ROWS[i].cells[j].className != "brick virtual"){
+				myTable.ROWS[i].cells[j].innerHTML = str;
 				document.getElementById(id).style.width = "30px";
 				document.getElementById(id).style.height = "30px";
 				document.getElementById(id).style.borderColor = "#fff";
@@ -39,11 +42,14 @@ function SetButtons(){
 			}
 		}
 	}
-	//initialise bricks
-	for(var i = 0; i < rows; i++){
+	InititaliseBricks();	
+}
+//initialise bricks
+function InititaliseBricks(){
+	for(var i = 0; i < ROWS; i++){
 		bricks[i] = new Array();
 		playerBricks[i] = new Array(); 
-		for(var j = 0; j < cols; j++){
+		for(var j = 0; j < COLS; j++){
 			bricks[i][j] = new Brick();	
 			playerBricks[i][j] = new PlayerBrick();
 		}
@@ -55,23 +61,16 @@ function ClickAction(obj){
 	var id = obj.id;
 	if(startMark){
 		ClickFirst(id);
-		DisplayNumber(Math.floor(id/cols), id%cols);
+		DisplayNumber(Math.floor(id/COLS), id%COLS);
 		PlayerSync();
 		AutomaticSearching();
-		console.log(groupSplit([],1));
-		//console.log(MinePossibility(10,10));
-		//console.log(C(3,3));	
-
-		//GetBoundary();	
 		startMark = false;
 	}
 	else{
-		if(!GameOver(Math.floor(id/cols), id%cols)){
-			DisplayNumber(Math.floor(id/cols), id%cols);
+		if(!GameOver(Math.floor(id/COLS), id%COLS)){
+			DisplayNumber(Math.floor(id/COLS), id%COLS);
 			PlayerSync();
 			AutomaticSearching();
-			//console.log(MinePossibility(10,10));
-			//GetBoundary();
 		}
 	}
 }
@@ -80,11 +79,11 @@ function ClickAction(obj){
 function ClickFirst(id){
 	var speicialBricks = NineId(id);				
 	//put mines randomly
-	for(var i = 0; i < mineNum; i++){
-		var randomMine = Math.floor(Math.random() * cols * rows);
+	for(var i = 0; i < MINE_NUM; i++){
+		var randomMine = Math.floor(Math.random() * COLS * ROWS);
 		if(speicialBricks.indexOf(randomMine)<0 && mines.indexOf(randomMine)<0){
-			if(randomMine > cols && randomMine < ((rows-1)*cols-1) 
-				&& randomMine%cols!=0 && (randomMine%cols!=(cols-1))){
+			if(randomMine > COLS && randomMine < ((ROWS-1)*COLS-1) 
+				&& randomMine%COLS!=0 && (randomMine%COLS!=(COLS-1))){
 				mines[i] = randomMine;	
 				//document.getElementById(randomMine).style.backgroundColor = "#f00";
 			}else{
@@ -97,7 +96,7 @@ function ClickFirst(id){
 	// mark mines
 	for(var i = 0; i < bricks.length; i++){
 		for(var j = 0; j < bricks[i].length; j++){
-			if(mines.indexOf(i*cols+j) >= 0){
+			if(mines.indexOf(i*COLS+j) >= 0){
 				bricks[i][j].isMine = true;
 			}			
 		}
@@ -122,15 +121,15 @@ function ClickFirst(id){
 
 function DisplayNumber(i,j){
 
-	if(i>0 && i<rows-1 && j>0 && j<cols-1 && !bricks[i][j].isClicked){
+	if(i>0 && i<ROWS-1 && j>0 && j<COLS-1 && !bricks[i][j].isClicked){
 
-		document.getElementById(i*cols+j).style.backgroundColor = "#eee";
-		document.getElementById(i*cols+j).disabled = true;
+		document.getElementById(i*COLS+j).style.backgroundColor = "#eee";
+		document.getElementById(i*COLS+j).disabled = true;
 		bricks[i][j].isClicked = true;
 
 		if(bricks[i][j].totalNum != 0){
-			document.getElementById(i*cols+j).style.color = NumberColor(bricks[i][j].totalNum);
-			document.getElementById(i*cols+j).innerHTML = bricks[i][j].totalNum;
+			document.getElementById(i*COLS+j).style.color = NumberColor(bricks[i][j].totalNum);
+			document.getElementById(i*COLS+j).innerHTML = bricks[i][j].totalNum;
 		}
 		else{
 			for(var m = 0; m < 9; m++){
@@ -154,8 +153,8 @@ function GameOver(i,j){
 
 //get all clicked information after each click 
 function PlayerSync(){
-	for(var i = 0; i < rows; i++){
-		for(var j = 0; j < cols; j++){
+	for(var i = 0; i < ROWS; i++){
+		for(var j = 0; j < COLS; j++){
 			if(bricks[i][j].isClicked){
 				playerBricks[i][j].isClicked = true;			
 			}
@@ -176,7 +175,7 @@ function AutomaticSearching(){
 						var y = leftArray[m][1];
 						playerBricks[x][y].isMine = true;
 						bricks[i][j].leftNum--;	
-						document.getElementById(x*cols+y).style.backgroundColor = "#0de";
+						document.getElementById(x*COLS+y).style.backgroundColor = "#0de";
 					}
 				}
 			}
@@ -192,22 +191,23 @@ function AutomaticSearching(){
 						var x = leftArray[m][0];
 						var y = leftArray[m][1];		
 						if(!playerBricks[x][y].isMine){
-							document.getElementById(x*cols+y).style.backgroundColor = "#f0f";
-						}
-						
+							document.getElementById(x*COLS+y).style.backgroundColor = "#f0f";
+						}	
 					}
 				}
 			}
 		}
 	}
 	//boundary searching
+
 	if(isTimeToAssumption()){
 		var possibility = GetPossibility();
+
 		if(possibility.length == 1){
 			for(var p = 0; p < possibility[0].length; p++){
 				var x = possibility[p][0];
 				var y = possibility[p][1];
-				document.getElementById(x*cols+y).style.backgroundColor = "#0de";
+				document.getElementById(x*COLS+y).style.backgroundColor = "#0de";
 			}
 		}
 		if(possibility.length > 1){
@@ -215,13 +215,16 @@ function AutomaticSearching(){
 				var x = possibility[i][0];
 				var y = possibility[i][1];
 				var point = [x,y];
-				for(var j = 0; j < possibility.length; j++){
-					if(!possibility[j].indexOf(point)){
+				var j = 0;
+				for(j = 0; j < possibility.length; j++){
+					if(possibility[j].indexOf(point) < 0){
 						break;
 					}
 				}
 				if(j == possibility.length){
-					document.getElementById(x*cols+y).style.backgroundColor = "#0de";
+					console.log(x +","+y);
+					//document.getElementById(x*COLS+y).style.backgroundColor = "#0de";
+					document.getElementById(x*COLS+y).style.backgroundColor = "#0de";
 				}
 			}
 		}
@@ -237,80 +240,81 @@ function GetPossibility(){
 		for(var l = 0; l < boundary.length; l++){
 			var x = boundary[l][0];
 			var y = boundary[l][1];
-			console.log("num : "+ bricks[x][y].totalNum);
-			if(!playerBricks[x][y].isMine){
-				var possibility = MinePossibility(x,y);
-				var pLen = possibility.length;
-				if(pLen > 0){		
-					var rLen = results.length;
-					console.log("posi : "+possibility);
-					for(var r = 0; r < rLen; r++){
-						var tempArr = results[r].slice(0);
-						console.log("temp1:"+tempArr);
-						for(var point = 0; point < possibility[0].length; point++){
-							console.log("ccc"+possibility[0][point]);
-							results[r].push(possibility[0][point]);
+			var possibility = MinePossibility(x,y);
+			var pLen = possibility.length;
+			console.log("num: "+bricks[x][y].totalNum);
+			console.log("pLen: "+pLen);
+			if(!playerBricks[x][y].isMine && pLen > 0){	
+				var rLen = results.length;
+				for(var r = 0; r < rLen; r++){
+					var tempArr  = results[r].slice(0);
+					//console.log("temp1 : "+tempArr);
+					for(var point = 0; point < possibility[0].length; point++){
+						results[r].push(possibility[0][point].slice(0));
+						//console.log(r + ": "+results[r]);
+					}
+					var mark = 1;
+					while(mark < pLen){	
+						//console.log("temp2 : "+tempArr);				
+						results.push(tempArr.slice(0));		
+						for(var point = 0; point < possibility[mark].length; point++){
+							results[results.length - 1].push(possibility[mark][point].slice(0));
+							//console.log((results.length - 1) + ": "+results[results.length - 1]);
 						}
-						for(var m = 0; m<results.length; m++){
-						console.log(m+"]:"+results[m]);
+						mark++;
+					}					
+				}
+				console.log("before:");
+				for(var m = 0; m<results.length; m++){
+					console.log(m+"]:"+results[m]);
+				}
+				for(var r = 0; r < results.length; r++){
+					for(var p = 0; p < results[r].length; p++){
+						var _x = results[r][p][0];
+						var _y = results[r][p][1];
+						playerBricks[_x][_y].isTempMine = true;
 					}
-
-						var mark = 1;
-						while(mark < pLen){		
-							console.log("temp2:"+tempArr);			
-							results.push(tempArr);	
-							console.log(results.length);		
-							for(var point = 0; point < possibility[mark].length; point++){
-								console.log("ccc"+possibility[mark][point]);
-								results[results.length - 1].push(possibility[mark][point]);
-							}
-							mark++;
-						}	
-							
-					}
-					for(var m = 0; m<results.length; m++){
-						console.log(m+"]:"+results[m]);
-					}	
-					for(var r = 0; r < results.length; r++){
+					if(!Rationality(x,y)){
 						for(var p = 0; p < results[r].length; p++){
 							var _x = results[r][p][0];
 							var _y = results[r][p][1];
-							playerBricks[_x][_y].isTempMine = true;
+							playerBricks[_x][_y].isTempMine = false;
 						}
-						if(!Rationality(x,y)){
-							results.splice(r,1);
-						}
-						else{
-							for(var p = 0; p < results[r].length; p++){
-								var _x = results[r][p][0];
-								var _y = results[r][p][1];
-								playerBricks[_x][_y].isTempMine = false;
-							}
-						}			
+						results.splice(r,1);
+						r--;
 					}
+					else{
+						for(var p = 0; p < results[r].length; p++){
+							var _x = results[r][p][0];
+							var _y = results[r][p][1];
+							playerBricks[_x][_y].isTempMine = false;
+						}
+					}			
 				}	
-				//console.log(results);		
-			}
+				console.log("after:");
+				for(var m = 0; m<results.length; m++){
+					console.log(m+"]:"+results[m]);
+				}		
+			}	
 		}
+		console.log("last:");
+			for(var m = 0; m<results.length; m++){
+				console.log(m+"]:"+results[m]);
+			}
+		
 	}
+		
 	return results;
 }
 
 function Rationality(i,j){
 	for(var m = 0; m < 9; m++){
 		if(m!=4){
-			var x1 = NineBricks(i,j)[m][0];
-			var y1 = NineBricks(i,j)[m][1]; 
-			if(bricks[x1][y1].isClicked){
-				for(var n = 0; n < 9; n++){
-					if(n != 4){
-						var x2 = NineBricks(x1,y1)[n][0];
-						var y2 = NineBricks(x1,y1)[n][1];
-						console.log("xxxx" + x2+","+y2);
-						if((LeftNumberOfMines(x2,y2) - TempmineNumberOfBrick(x2,y2)) < 0){
-							return false;
-						}
-					}
+			var x = NineBricks(i,j)[m][0];
+			var y = NineBricks(i,j)[m][1]; 
+			if(bricks[x][y].isClicked && bricks[x][y].totalNum > 0){
+				if((LeftNumberOfMines(x,y) - TempmineNumberOfBrick(x,y)) < 0){
+					return false;
 				}
 			}
 		}
@@ -323,9 +327,9 @@ function Rationality(i,j){
 function MinePossibility(i,j){
 	var possibility = new Array();
 	var leftMine = LeftNumberOfMines(i,j);
+	var unclickdArray = UnclickedNumberOfBrick(i,j);
 	//console.log("leftmine:" + leftMine);
-	if(leftMine > 0){
-		var unclickdArray = UnclickedNumberOfBrick(i,j);
+	if(leftMine > 0){	
 		possibility = groupSplit(unclickdArray,leftMine);	
 	}
 	return possibility;
@@ -376,7 +380,7 @@ function GetBoundary(){
 			if(isBoundary(i,j)){
 				playerBricks[i][j].isEdge = true; //find all edges
 			}
-			document.getElementById(i*cols+j).style.borderColor = "#fff";
+			document.getElementById(i*COLS+j).style.borderColor = "#fff";
 		}
 	}	
 	//find edge
@@ -389,7 +393,7 @@ function GetBoundary(){
 					scanPonit.push([i,j,0]);
 					playerBricks[i][j].isScan = true;
 					nextPoint = DirectionSearching(i,j,0);
-					document.getElementById(i*cols+j).style.borderColor =  "#234";
+					document.getElementById(i*COLS+j).style.borderColor =  "#234";
 					while(nextPoint[0]!=scanPonit[0][0] || nextPoint[1]!=scanPonit[0][1]){
 						var x = nextPoint[0];
 						var y = nextPoint[1];
@@ -397,7 +401,7 @@ function GetBoundary(){
 						scanPonit.push(nextPoint);
 						playerBricks[x][y].isScan = true;
 						nextPoint = DirectionSearching(x,y,dir);
-						document.getElementById(x*cols+y).style.borderColor =  "#234";
+						document.getElementById(x*COLS+y).style.borderColor =  "#234";
 					}
 					bounaries.push(scanPonit);		
 				}			
@@ -412,7 +416,7 @@ function GetBoundary(){
 function isTimeToAssumption(){
 	for(var i = 1; i < playerBricks.length - 1; i++){
 		for(var j = 1; j < playerBricks[i].length - 1; j++){
-			if(document.getElementById(i*cols+j).style.backgroundColor == "rgb(255, 0, 255)"){
+			if(document.getElementById(i*COLS+j).style.backgroundColor == "rgb(255, 0, 255)"){
 				return false;
 			}
 		}
@@ -514,15 +518,15 @@ function UnclickedNumberOfBrick(i,j){
 
 function NineId(id){
 	return [
-			id-1-cols,
-			id-cols, 
-			id-cols+1,
+			id-1-COLS,
+			id-COLS, 
+			id-COLS+1,
 			id-1,
 			id-0,
 			id-(-1),
-			id-1-(-cols),
-			id-(-cols),
-			id-(-cols-1)
+			id-1-(-COLS),
+			id-(-COLS),
+			id-(-COLS-1)
 		];
 }
 
