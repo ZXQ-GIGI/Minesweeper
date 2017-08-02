@@ -223,8 +223,10 @@ function NumberSearching(){
 
 function BoundarySearching(){
 	if(isTimeToAssumption()){
-		var possibility = GetPossibility();
-		if(possibility.length == 1){
+		GetPossibility();
+		NumberSearching();
+	}
+	/*	if(possibility.length == 1){
 			for(var p = 0; p < possibility[0].length; p++){
 				var x = possibility[p].x;
 				var y = possibility[p].y;
@@ -248,9 +250,9 @@ function BoundarySearching(){
 				}
 			}
 		}
-	}
+	}*/
 	//number searching
-	NumberSearching();	
+		
 }
 
 function GetPossibility(){
@@ -264,30 +266,66 @@ function GetPossibility(){
 			var possibility = MinePossibility(x,y);
 			var pLen = possibility.length;
 			if(!playerBricks[x][y].isMine && pLen > 0){	
-				var rLen = results.length;
-				for(var r = 0; r < rLen; r++){
-					var tempArr  = results[r].slice(0);
-					//results[r].concat.apply(results[r],possibility[0]);
-					for(var point = 0; point < possibility[0].length; point++){
-						results[r].push(possibility[0][point]);
-					}
-					var mark = 1;
-					while(mark < pLen){					
-						results.push(tempArr.slice(0));	
-						//results[results.length - 1].concat.apply(possibility[mark]);	
-						for(var point = 0; point < possibility[mark].length; point++){
-							results[results.length - 1].push(possibility[mark][point]);
-						}
-						mark++;
-					}					
-				}
+				PushPossibility(results,x,y,possibility);
 				console.log("1:"+results.length);
 				ResultVerification(results,x,y);
 				console.log("2:"+results.length);
+				var periphery = GetPeriphery(boundary);
+				console.log(periphery);
+				if(GetNumberOfResults(results,periphery)){
+					GetMinesOfResults(results);
+					results = [[]];
+				}				
 			}	
 		}		
 	}	
-	return results;
+}
+function GetMinesOfResults(results){
+	if(results.length == 1){
+		for(var p = 0; p < results[0].length; p++){
+			var x = results[0][p].x;
+			var y = results[0][p].y;
+			//console.log(results[0]);
+			playerBricks[x][y].isMine = true;
+			SetBackgroundColor(x*COLS+y, HINT_MINE_COLOR);
+		}
+	}
+	if(results.length > 1){
+		for(var i = 0; i < results[0].length; i++){
+			var x = results[0][i].x;
+			var y = results[0][i].y;
+			var point = new Point(x,y);
+			for(var j = 1; j < results.length; j++){
+				if(PointIndexOf(point,results[j]) < 0){
+					break;
+				}
+				if(j == results.length - 1){
+					playerBricks[x][y].isMine = true;
+					SetBackgroundColor(x*COLS+y, HINT_MINE_COLOR);
+				}
+			}
+		}
+	}
+}
+function GetNumberOfResults(results, periphery){
+
+	if(results.length > 0 && results[0].length > 0){
+		for(var p = 0; p < periphery.length; p++){
+			var x = periphery[p].x;
+			var y = periphery[p].y;
+			for(var r = 0; r < results.length - 1; r++){
+				if(PointIndexOf(periphery[p],results[r]) > 0){
+					break;
+				}
+				if(r == results.length - 2){
+					console.log(x+","+y);
+					SetBackgroundColor(x*COLS+y, HINT_NUMBER_COLOR);
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 }
 function GetPeriphery(boundary){
 	var point_array = new Array();
@@ -296,12 +334,32 @@ function GetPeriphery(boundary){
 		var y = boundary[l][1];
 		var unclickdArray = UnclickedNumberOfBrick(x,y);
 		for(var u = 0; u < unclickdArray.length; u++){
-			if(PointIndexOf(new Point(x,y),point_array) < 0){
+			if(PointIndexOf(unclickdArray[u],point_array) < 0){
 				point_array.push(unclickdArray[u]);
 			}
 		}
 	}
 	return point_array;
+}
+function PushPossibility(results,x,y,possibility){
+	var pLen = possibility.length;
+	var rLen = results.length;
+	for(var r = 0; r < rLen; r++){
+		var tempArr  = results[r].slice(0);
+		//results[r].concat.apply(results[r],possibility[0]);
+		for(var point = 0; point < possibility[0].length; point++){
+			results[r].push(possibility[0][point]);
+		}
+		var mark = 1;
+		while(mark < pLen){					
+			results.push(tempArr.slice(0));	
+			//results[results.length - 1].concat.apply(possibility[mark]);	
+			for(var point = 0; point < possibility[mark].length; point++){
+				results[results.length - 1].push(possibility[mark][point]);
+			}
+			mark++;
+		}					
+	}
 }
 function ResultVerification(results,x,y){
 	for(var r = 0; r < results.length; r++){
@@ -381,7 +439,7 @@ function GetBoundary(){
 			if(isBoundary(i,j)){
 				playerBricks[i][j].isEdge = true; //find all edges
 			}
-		//	document.getElementById(i*COLS+j).style.borderColor = "#fff";
+			document.getElementById(i*COLS+j).style.borderColor = "#fff";
 		}
 	}	
 	//find edge
@@ -394,7 +452,7 @@ function GetBoundary(){
 					scanPonit.push([i,j,0]);
 					playerBricks[i][j].isScan = true;
 					nextPoint = DirectionSearching(i,j,0);
-					//document.getElementById(i*COLS+j).style.borderColor =  "#234";
+					document.getElementById(i*COLS+j).style.borderColor =  "#234";
 					while(nextPoint[0]!=scanPonit[0][0] || nextPoint[1]!=scanPonit[0][1]){
 						var x = nextPoint[0];
 						var y = nextPoint[1];
@@ -402,7 +460,7 @@ function GetBoundary(){
 						scanPonit.push(nextPoint);
 						playerBricks[x][y].isScan = true;
 						nextPoint = DirectionSearching(x,y,dir);
-					//	document.getElementById(x*COLS+y).style.borderColor =  "#234";
+						document.getElementById(x*COLS+y).style.borderColor =  "#234";
 					}
 					bounaries.push(scanPonit);		
 				}			
