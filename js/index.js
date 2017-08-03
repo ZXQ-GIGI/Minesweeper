@@ -260,21 +260,29 @@ function GetPossibility(){
 	for(var b = 0; b < bounaries.length; b++){
 		var boundary = bounaries[b];
 		var results = [[]];
+		var temp = 0;
 		for(var l = 0; l < boundary.length; l++){
 			var x = boundary[l][0];
 			var y = boundary[l][1];
 			var possibility = MinePossibility(x,y);
 			var pLen = possibility.length;
 			if(!playerBricks[x][y].isMine && pLen > 0){	
+				temp = l;
 				PushPossibility(results,x,y,possibility);
-				console.log("1:"+results.length);
+			//	console.log("1:"+results.length);
 				ResultVerification(results,x,y);
-				console.log("2:"+results.length);
-				var periphery = GetPeriphery(boundary);
-				console.log(periphery);
+			//	console.log("2:"+results.length);
+				var periphery = GetPeriphery(boundary, temp ,l);
+			//	console.log(periphery);
 				if(GetNumberOfResults(results,periphery)){
+					console.log(l + " break!");
 					GetMinesOfResults(results);
+					temp = l;
 					results = [[]];
+					//return;
+				}
+				if(l == boundary.length - 1){
+					GetMinesOfResults(results);
 				}				
 			}	
 		}		
@@ -308,28 +316,38 @@ function GetMinesOfResults(results){
 	}
 }
 function GetNumberOfResults(results, periphery){
-
 	if(results.length > 0 && results[0].length > 0){
 		for(var p = 0; p < periphery.length; p++){
 			var x = periphery[p].x;
 			var y = periphery[p].y;
-			for(var r = 0; r < results.length - 1; r++){
-				if(PointIndexOf(periphery[p],results[r]) > 0){
+			for(var r = 0; r < results.length; r++){
+				//console.log(periphery[p]);
+				//console.log(results[r]);
+				if(PointIndexOf(periphery[p],results[r]) >= 0){
+				//	console.log("is in");
+					//console.log(results[r]);
+					//console.log("!");
 					break;
 				}
-				if(r == results.length - 2){
-					console.log(x+","+y);
+				if(r == results.length - 1){
+				//	console.log("is not in");
+					//console.log(results[r]);
+					//console.log("!");
+				//	console.log(x+","+y);
 					SetBackgroundColor(x*COLS+y, HINT_NUMBER_COLOR);
 					return true;
 				}
 			}
 		}
+		//if(pos2 == results.length - 1){
+		//	return true;
+		//}
 	}
 	return false;
 }
-function GetPeriphery(boundary){
+function GetPeriphery(boundary, pos1, pos2){
 	var point_array = new Array();
-	for(var l = 0; l < boundary.length; l++){
+	for(var l = pos1; l <= pos2; l++){
 		var x = boundary[l][0];
 		var y = boundary[l][1];
 		var unclickdArray = UnclickedNumberOfBrick(x,y);
