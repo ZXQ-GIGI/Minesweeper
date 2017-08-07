@@ -7,6 +7,7 @@ const MINE_COLOR = "#f00";
 const HINT_MINE_COLOR = "#0de";
 const HINT_NUMBER_COLOR = "#f0f";
 const CLICKED_NUMBER_COLOR = "#eee";
+const ROOT_NODE = "root";
 
 var startMark = false;
 var mines = new Array();
@@ -28,6 +29,91 @@ function Point(x,y){
 	this.x = x;
 	this.y = y;
 }
+
+function Node(data,left,right,parent,weight){
+	this.data = data;
+	this.left = left;
+	this.right = right;
+	this.parent = parent;
+	this.weight = weight;
+}
+function BinaryTree(){
+	this.root = new Node(ROOT_NODE,null,null,null);
+	this.level = 0;
+	this.addLevel = function(){
+		this.level++;
+	}
+}
+BinaryTree.prototype.lastLevelTraversal = function(level) {
+	var arr = new Array();
+	var lestLevel = new Array();
+	arr.push(this.root);
+	var cur = 0;
+	var end = 1;
+	while(cur < arr.length){
+		end = arr.length;
+		while(cur < end){			
+			if(arr[cur].left){
+				arr.push(arr[cur].right);
+			}
+			if(arr[cur].right){
+				arr.push(arr[cur].left);
+			}
+			cur++;
+		}
+	}
+	for(var i = Math.pow(2,n) - 1; i <= Math.pow(2,n + 1)-2; i++){
+		lastLevel.push(arr[i]);
+	}
+	return lastLevel;
+};
+
+BinaryTree.prototype.insertLevel = function(point) {
+	var arr = this.lastLevelTraversal(this.level);
+	for(var i = 0; i < arr.length; i++){
+		var newLeftNode = new Node(point,null,null,arr[i],0);
+		var newRightNode = new Node(point,null,null,arr[i],1);
+		arr[i].left = newLeftNode;
+		arr[i].right = newRightNode;
+	}
+	this.addLevel();
+};
+
+BinaryTree.prototype.ResultVerification = function() {
+	var arr = this.lastLevelTraversal(this.level);
+	for(var i = 0; i < arr.length; i++){
+		var result = new Array();
+		var temp = arr[i];
+		while(temp.data != ROOT_NODE){
+			//result.push(temp);
+			if(temp.weight == 1){
+				var x = temp.data.x;
+				var y = temp.data.y;
+				playerBricks[x][y].isTempMine = true;
+			}		
+			temp = temp.parent;
+		}
+		var x = arr[i].data.x;
+		var y = arr[i].data.y;
+		if(!Rationality(x,y)){
+			if(arr[i].weight == 0){
+				arr[i].parent.left = null;
+			}
+			else{
+				arr[i].parent.rght = null;
+			}
+		}
+		while(temp.data != ROOT_NODE){
+			//result.push(temp);
+			if(temp.weight == 1){
+				var x = temp.data.x;
+				var y = temp.data.y;
+				playerBricks[x][y].isTempMine = true;
+			}		
+			temp = temp.parent;
+		}
+	}
+};
 function SetButtons(){
 	startMark = true;
 	var myTable = document.getElementById("tab");
@@ -225,34 +311,7 @@ function BoundarySearching(){
 	if(isTimeToAssumption()){
 		GetPossibility();
 		NumberSearching();
-	}
-	/*	if(possibility.length == 1){
-			for(var p = 0; p < possibility[0].length; p++){
-				var x = possibility[p].x;
-				var y = possibility[p].y;
-				playerBricks[x][y].isMine = true;
-				SetBackgroundColor(x*COLS+y, HINT_MINE_COLOR);
-			}
-		}
-		if(possibility.length > 1){
-			for(var i = 0; i < possibility[0].length; i++){
-				var x = possibility[0][i].x;
-				var y = possibility[0][i].y;
-				var point = new Point(x,y);
-				for(var j = 1; j < possibility.length; j++){
-					if(PointIndexOf(point,possibility[j]) < 0){
-						break;
-					}
-					if(j == possibility.length - 1){
-						playerBricks[x][y].isMine = true;
-						SetBackgroundColor(x*COLS+y, HINT_MINE_COLOR);
-					}
-				}
-			}
-		}
-	}*/
-	//number searching
-		
+	}		
 }
 
 function GetPossibility(){
