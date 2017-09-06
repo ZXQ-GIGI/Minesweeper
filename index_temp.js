@@ -1,4 +1,4 @@
 'use strict'
-
-var canvas = require("./src/canvas");
+import './src/canvas.js';
+//var canvas = require("./src/canvas");
 var myTable = new canvas();
