@@ -1,4 +1,6 @@
 'use strict'
-import './src/canvas.js';
-//var canvas = require("./src/canvas");
-var myTable = new canvas();
+
+//set canvas
+//var start_btn = document.getElementById("start");
+//start_btn.setAttribute("onclick",)
+//document.write("<script src='./src/canvas.js' type='text/javascript'></script>");
