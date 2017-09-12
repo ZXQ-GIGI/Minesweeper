@@ -6,21 +6,17 @@ var clickAction = function(){
         for(var j = 1; j < COLS - 1; j++){
             var brick = document.getElementById((i*COLS+j).toString());
             brick.onclick = function(){
+                var id = brick.id;
                 return function(){
-                    console.log(brick.id);
+                    document.getElementById(id).style.backgroundColor = "#ff0";
                 }
             }();
-            /*brick.addEventListener("click",function(){
-                return function(){
-                    console.log('1');
-                }
-            });
-            */
         }
     }
-}
+};
 
 /* set canvas */
+clickAction();
 var start_btn = document.getElementById("start");
 start_btn.addEventListener("click",function(){
     resetButtons();
