@@ -1,0 +1,28 @@
+{
+  "name": "minesweeper",
+  "version": "1.0.0",
+  "description": "IntelliSense of minesweeper",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZXQ-GIGI/Minesweeper.git"
+  },
+  "keywords": [
+    "minesweeper"
+  ],
+  "author": "zhaoxiaoqi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ZXQ-GIGI/Minesweeper/issues"
+  },
+  "homepage": "https://github.com/ZXQ-GIGI/Minesweeper#readme",
+  "devDependencies": {
+    "webpack": "^3.6.0"
+  },
+  "dependencies": {
+    "babel-loader": "^7.1.2"
+  }
+}

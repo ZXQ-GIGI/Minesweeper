@@ -4,7 +4,7 @@ Automatic
 ***src***
 
     1.canvas
-      页面的动态产生 //SetButtons
+      页面的动态产生 //
 
     2.brick
       块类，用来记录当前块的固有属性 //
